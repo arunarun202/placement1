@@ -1,0 +1,50 @@
+# Environment variables — NEVER commit these
+.env
+.env.*
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Database
+*.db
+*.sqlite3
+
+# Alembic (keep structure, skip local db state)
+alembic/versions/__pycache__/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Media uploads (large binary files)
+media/resumes/
+media/avatars/
+
+# Test artifacts (savepoint only — Excel reports ARE tracked)
+automated_test/savepoint.json
+automated_test/~$*.xlsx

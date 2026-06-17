@@ -1,0 +1,13 @@
+fastapi[standard]
+sqlalchemy
+alembic
+psycopg2-binary
+pydantic
+pydantic-settings
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt==4.0.1
+python-multipart
+httpx
+pdfplumber
+python-docx
