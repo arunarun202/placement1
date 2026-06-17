@@ -1,0 +1,508 @@
+# ============================================================
+#  PROJECT REQUIREMENTS — Placement Predictor Web Application
+#  Generated: 2026-06-17
+#  Repository: https://github.com/arunarun202/placement1
+# ============================================================
+
+project:
+  name: Placement Predictor
+  description: >
+    A full-stack AI-powered web application that predicts student placement
+    outcomes, evaluates resumes using LLM APIs, and provides an interactive
+    career assistant chatbot.
+  version: "1.0.0"
+  type: monorepo
+  repository: https://github.com/arunarun202/placement1
+  branches:
+    frontend: main
+    backend: main (subfolder /backend)
+
+# ============================================================
+#  SYSTEM REQUIREMENTS
+# ============================================================
+system:
+  os:
+    - Windows 10/11
+    - Ubuntu 22.04+
+    - macOS 13+
+  runtime:
+    node:
+      version: ">=18.0.0"
+      recommended: "20.x LTS"
+    python:
+      version: ">=3.11"
+      recommended: "3.11"
+  tools:
+    - git >= 2.40
+    - Google Chrome (for Selenium E2E tests)
+    - ChromeDriver (matching Chrome version)
+
+# ============================================================
+#  DATABASE
+# ============================================================
+database:
+  engine: PostgreSQL
+  version: ">=14"
+  name: placement_db
+  user: myuser               # Override via .env in production
+  host: localhost
+  port: 5432
+  orm: SQLAlchemy
+  migrations: Alembic
+
+# ============================================================
+#  BACKEND
+# ============================================================
+backend:
+  language: Python
+  version: "3.11"
+  framework: FastAPI
+  server: Uvicorn
+  port: 8000
+  base_path: /backend
+  entry_point: app/main.py
+
+  environment_variables:
+    DATABASE_URL:
+      description: PostgreSQL connection string
+      example: "postgresql://user:password@localhost:5432/placement_db"
+      required: true
+      sensitive: true
+    SECRET_KEY:
+      description: JWT signing secret (min 32 random hex chars)
+      example: "generated via: python -c \"import secrets; print(secrets.token_hex(32))\""
+      required: true
+      sensitive: true
+    ALGORITHM:
+      description: JWT signing algorithm
+      default: HS256
+      required: false
+    ACCESS_TOKEN_EXPIRE_MINUTES:
+      description: JWT token expiry in minutes
+      default: 30
+      required: false
+    OPENROUTER_API_KEY:
+      description: API key for OpenRouter LLM service (resume analysis, predictions, chat)
+      required: true
+      sensitive: true
+
+  python_dependencies:
+    production:
+      - name: fastapi
+        extras: "[standard]"
+        purpose: Web framework and async API server
+      - name: sqlalchemy
+        purpose: ORM for database models
+      - name: alembic
+        purpose: Database schema migrations
+      - name: psycopg2-binary
+        purpose: PostgreSQL driver
+      - name: pydantic
+        purpose: Data validation and settings management
+      - name: pydantic-settings
+        purpose: Environment variable config management
+      - name: python-jose
+        extras: "[cryptography]"
+        purpose: JWT token creation and validation
+      - name: passlib
+        extras: "[bcrypt]"
+        purpose: Password hashing
+      - name: bcrypt
+        version: "==4.0.1"
+        purpose: bcrypt backend (pinned for compatibility)
+      - name: python-multipart
+        purpose: Form data and file upload parsing
+      - name: httpx
+        purpose: Async HTTP client for OpenRouter API calls
+      - name: pdfplumber
+        purpose: Extract text from uploaded PDF resumes
+      - name: python-docx
+        purpose: Extract text from uploaded DOCX resumes
+
+    testing:
+      - name: openpyxl
+        purpose: Generate Excel DAST security test reports
+      - name: pytest
+        purpose: Unit and integration testing (recommended addition)
+      - name: httpx
+        purpose: Test async HTTP endpoints
+
+  api_endpoints:
+    - prefix: /auth
+      routes:
+        - method: POST
+          path: /auth/login
+          auth: public
+          description: Obtain JWT access token (OAuth2 password flow)
+        - method: POST
+          path: /auth/register
+          auth: public
+          description: Create new user account
+        - method: GET
+          path: /auth/me
+          auth: jwt_required
+          description: Get current authenticated user info
+
+    - prefix: /predict
+      routes:
+        - method: POST
+          path: /predict/
+          auth: jwt_required
+          description: Submit academic/skills data and get placement prediction via LLM
+        - method: GET
+          path: /predict/
+          auth: jwt_required
+          description: Retrieve prediction history for current user
+
+    - prefix: /resume
+      routes:
+        - method: POST
+          path: /resume/upload
+          auth: jwt_required
+          description: Upload PDF/DOCX resume and get ATS score + suggestions via LLM
+        - method: GET
+          path: /resume/
+          auth: jwt_required
+          description: Get resume upload history for current user
+        - method: GET
+          path: /resume/{id}
+          auth: jwt_required
+          description: Get a specific resume by ID
+        - method: DELETE
+          path: /resume/{id}
+          auth: jwt_required
+          description: Delete a specific resume and its file
+
+    - prefix: /chat
+      routes:
+        - method: POST
+          path: /chat/
+          auth: jwt_required
+          description: Send message to AI career assistant chatbot
+        - method: GET
+          path: /chat/
+          auth: jwt_required
+          description: Get chat history
+          known_issue: "IDOR — missing user_id filter. Returns ALL users data. Fix: add .filter(Chatbot.user_id == current_user.id)"
+
+    - prefix: /profile
+      routes:
+        - method: PUT
+          path: /profile/
+          auth: jwt_required
+          description: Update current user profile (username, email, bio, avatar)
+
+  docker:
+    base_image: python:3.11-slim
+    exposed_port: 8000
+    system_packages:
+      - build-essential
+      - libpq-dev
+    startup_command: "alembic upgrade head && fastapi run app/main.py --port 8000 --host 0.0.0.0"
+
+# ============================================================
+#  FRONTEND
+# ============================================================
+frontend:
+  language: JavaScript (ESM)
+  framework: React
+  version: "^19.2.6"
+  bundler: Vite
+  version_vite: "^8.0.12"
+  port: 5173
+  base_path: / (repo root on main branch)
+
+  npm_dependencies:
+    production:
+      - name: react
+        version: "^19.2.6"
+        purpose: Core UI library
+      - name: react-dom
+        version: "^19.2.6"
+        purpose: React DOM renderer
+      - name: react-router-dom
+        version: "^7.17.0"
+        purpose: Client-side routing and navigation
+      - name: axios
+        version: "^1.18.0"
+        purpose: HTTP client for backend API calls
+      - name: framer-motion
+        version: "^12.40.0"
+        purpose: Animations and page transitions
+      - name: chart.js
+        version: "^4.5.1"
+        purpose: Chart rendering engine
+      - name: react-chartjs-2
+        version: "^5.3.1"
+        purpose: React wrapper for Chart.js
+      - name: react-hot-toast
+        version: "^2.6.0"
+        purpose: Toast notification system
+      - name: react-icons
+        version: "^5.6.0"
+        purpose: Icon library (FontAwesome, Material, etc.)
+      - name: tailwindcss
+        version: "^4.3.1"
+        purpose: Utility-first CSS framework
+      - name: "@tailwindcss/vite"
+        version: "^4.3.1"
+        purpose: Tailwind CSS Vite plugin
+
+    development:
+      - name: vite
+        version: "^8.0.12"
+        purpose: Build tool and dev server
+      - name: "@vitejs/plugin-react"
+        version: "^6.0.1"
+        purpose: Vite React plugin (Fast Refresh, JSX transform)
+      - name: eslint
+        version: "^10.3.0"
+        purpose: JavaScript linter
+      - name: "@eslint/js"
+        version: "^10.0.1"
+        purpose: ESLint base ruleset
+      - name: eslint-plugin-react-hooks
+        version: "^7.1.1"
+        purpose: Lint React hooks usage
+      - name: eslint-plugin-react-refresh
+        version: "^0.5.2"
+        purpose: Lint Fast Refresh compatibility
+      - name: globals
+        version: "^17.6.0"
+        purpose: Global variable definitions for ESLint
+      - name: "@types/react"
+        version: "^19.2.14"
+        purpose: TypeScript type definitions for React
+      - name: "@types/react-dom"
+        version: "^19.2.3"
+        purpose: TypeScript type definitions for React DOM
+
+    testing:
+      - name: mocha
+        version: "^11.7.6"
+        purpose: E2E/Selenium test runner
+      - name: chai
+        version: "^6.2.2"
+        purpose: Assertion library for tests
+      - name: selenium-webdriver
+        version: "^4.45.0"
+        purpose: Browser automation for E2E tests
+      - name: exceljs
+        version: "^4.4.0"
+        purpose: Generate Excel test results report
+
+  pages:
+    - path: /
+      component: HomePage
+      auth: public
+    - path: /login
+      component: LoginPage
+      auth: public
+    - path: /register
+      component: RegisterPage
+      auth: public
+    - path: /dashboard
+      component: DashboardPage
+      auth: protected
+    - path: /predict
+      component: PredictionPage
+      auth: protected
+    - path: /predict/result
+      component: PredictionResult
+      auth: protected
+    - path: /resume
+      component: ResumeUploadPage
+      auth: protected
+    - path: /resume/result
+      component: ResumeResultPage
+      auth: protected
+    - path: /profile
+      component: ProfilePage
+      auth: protected
+    - path: "*"
+      component: NotFoundPage
+      auth: public
+
+  npm_scripts:
+    dev: vite
+    build: vite build
+    preview: vite preview
+    lint: eslint .
+    test:e2e: mocha selenium-tests/tests/**/*.js --timeout 60000
+
+# ============================================================
+#  TESTING
+# ============================================================
+testing:
+  e2e:
+    framework: Selenium WebDriver + Mocha + Chai
+    test_file: frontend/selenium-tests/tests/login.test.js
+    browser: Google Chrome
+    total_test_cases: 106
+    categories:
+      - name: UI/UX Tests
+        count: 10
+        description: DOM element visibility, animations, toggle interactions
+      - name: Functional Testing
+        count: 3
+        description: Live login flow (valid, invalid password, unregistered user)
+      - name: Validation Testing
+        count: 26
+        description: Invalid username formats, boundary value lengths
+      - name: Security/Injection Testing
+        count: 22
+        description: SQL injection payloads, XSS payloads typed into browser live
+      - name: Deployable Status Checks
+        count: 45
+        description: Health checks, environment state verification
+    excel_report: frontend/Test_Results_Summary.xlsx
+    run_command: npm run test:e2e
+    prerequisite: npm run dev (frontend must be running on localhost:5173)
+
+  dast:
+    type: Dynamic Application Security Testing
+    tool: Custom Python runner (automated_test/runner.py)
+    total_test_cases: 30
+    categories:
+      - name: Hardcoded Credentials
+        count: 3
+        severity: CRITICAL/HIGH
+      - name: Authentication Bypass (AuthN)
+        count: 9
+        severity: varies
+      - name: IDOR / Authorization
+        count: 4
+        severity: HIGH
+      - name: Token Tampering
+        count: 3
+        severity: HIGH
+      - name: SQL/NoSQL Injection Detection
+        count: 5
+        severity: CRITICAL
+      - name: Rate Limiting
+        count: 2
+        severity: MEDIUM
+      - name: CORS Misconfiguration
+        count: 1
+        severity: MEDIUM
+      - name: Edge Case Auth
+        count: 3
+        severity: varies
+    excel_report_v1: backend/automated_test/DAST_Security_Report.xlsx
+    excel_report_v2: backend/automated_test/DAST_Security_Report_v2.xlsx
+    run_command: python automated_test/runner.py
+    prerequisite: Backend running on localhost:8000 + valid JWT token in input.json
+
+  confirmed_vulnerabilities:
+    - id: VULN-001
+      severity: CRITICAL
+      title: Weak Default JWT Secret Key
+      file: backend/app/core/config.py
+      fix: Replace with 32-byte random hex secret stored only in .env
+    - id: VULN-002
+      severity: CRITICAL
+      title: Live OpenRouter API Key Committed to Repo
+      file: backend/.env
+      fix: Rotate key immediately; add .env to .gitignore
+    - id: VULN-003
+      severity: HIGH
+      title: Database Credentials Hardcoded in Source
+      file: backend/app/core/config.py
+      fix: Remove default value; require env var only
+    - id: VULN-004
+      severity: HIGH
+      title: IDOR — GET /chat/ Returns All Users Data
+      file: backend/app/api/chat.py (line 45)
+      fix: "Add .filter(Chatbot.user_id == current_user.id) to query"
+    - id: VULN-005
+      severity: MEDIUM
+      title: CORS Wildcard with Credentials Enabled
+      file: backend/app/main.py (line 16)
+      fix: Replace '*' with specific frontend origin URL
+    - id: VULN-006
+      severity: MEDIUM
+      title: No Rate Limiting on /auth/login
+      file: backend/app/main.py
+      fix: Add slowapi middleware with 5 req/min limit
+
+# ============================================================
+#  DEPLOYMENT
+# ============================================================
+deployment:
+  frontend:
+    platform: Vercel
+    config_file: frontend/vercel.json
+    build_command: npm run build
+    output_directory: dist
+    env_vars_needed:
+      - VITE_API_BASE_URL
+
+  backend:
+    platform: Docker (any cloud provider)
+    dockerfile: backend/Dockerfile
+    exposed_port: 8000
+    env_vars_needed:
+      - DATABASE_URL
+      - SECRET_KEY
+      - ALGORITHM
+      - ACCESS_TOKEN_EXPIRE_MINUTES
+      - OPENROUTER_API_KEY
+
+# ============================================================
+#  QUICK START
+# ============================================================
+quickstart:
+  clone:
+    command: "git clone https://github.com/arunarun202/placement1.git"
+
+  backend_setup:
+    steps:
+      - step: 1
+        description: Navigate to backend folder
+        command: cd backend
+      - step: 2
+        description: Create and activate virtual environment
+        command: "python -m venv venv && venv\\Scripts\\activate"
+      - step: 3
+        description: Install Python dependencies
+        command: pip install -r requirements.txt
+      - step: 4
+        description: Create .env file with required variables
+        note: "Copy the template below into a file named .env"
+        template: |
+          DATABASE_URL=postgresql://user:password@localhost:5432/placement_db
+          SECRET_KEY=<run: python -c "import secrets; print(secrets.token_hex(32))">
+          ALGORITHM=HS256
+          ACCESS_TOKEN_EXPIRE_MINUTES=30
+          OPENROUTER_API_KEY=<your-openrouter-key>
+      - step: 5
+        description: Run database migrations
+        command: alembic upgrade head
+      - step: 6
+        description: Start backend server
+        command: uvicorn app.main:app --reload --port 8000
+
+  frontend_setup:
+    steps:
+      - step: 1
+        description: Navigate to project root (frontend files are at repo root)
+        command: cd ..  # from backend, or stay in repo root
+      - step: 2
+        description: Install Node dependencies
+        command: npm install
+      - step: 3
+        description: Start development server
+        command: npm run dev
+      - step: 4
+        description: Open browser
+        url: http://localhost:5173
+
+  run_tests:
+    e2e:
+      prerequisite: Both frontend (5173) and backend (8000) must be running
+      command: npm run test:e2e
+    dast:
+      prerequisite: Backend must be running; fill token in backend/automated_test/input.json
+      command: "cd backend && python automated_test/runner.py"
+    generate_excel_report:
+      command: "cd backend && python automated_test/generate_excel_report.py"
