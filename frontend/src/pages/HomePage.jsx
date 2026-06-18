@@ -107,7 +107,7 @@ const HomePage = () => {
             >
               <div className="absolute top-0 right-0 p-4">
                 <span className="bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                  Powered by Gemini
+                  Powered by AI
                 </span>
               </div>
               <div className="w-16 h-16 rounded-2xl bg-orange-100 flex items-center justify-center mb-6">

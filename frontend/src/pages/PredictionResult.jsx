@@ -21,23 +21,30 @@ const PredictionResult = () => {
     ten_percentage, twelth_percentage, salary, soft_skills, internship, experience,
     round, company_name, created_at } = result;
 
+  const genderMap = { 0: 'Male', 1: 'Female' };
+  const qualificationMap = { 0: 'B.TECH', 1: 'BCA', 2: 'BE', 3: 'BSC', 4: 'DIPLOMA', 5: 'ITI', 6: 'M.TECH', 7: 'MCA', 8: 'MCS' };
+  const yesNoMap = { 0: 'No', 1: 'Yes' };
+  const jobRoleMap = { 0: 'Android Studio', 1: 'C', 2: 'C++', 3: 'Data Analytics', 4: 'Data Science', 5: 'Frontend', 6: 'Full Stack', 7: 'Java', 8: 'Node JS', 9: 'Python', 10: 'React' };
+  const softSkillsMap = { 0: 'Adaptability', 1: 'Communication', 2: 'Emotional Intelligence', 3: 'Data', 4: 'Leadership', 5: 'Problem Solving', 6: 'Teamwork', 7: 'Time Management' };
+  const companyMap = { 0: 'Accenture India', 1: 'Amazon India', 22: 'Infosys', 43: 'TCS', 47: 'Wipro', 24: 'Kotak Mahindra Bank', 19: 'HDFC Bank', 37: 'Reliance Jio', 14: 'Flipkart', 9: 'Capgemini', 10: 'Cognizant', 8: "Byju's", 48: 'Zoho', 49: 'Zomato' };
+
   // Build stats for display
   const statsItems = [
     { name: 'Age', value: age },
-    { name: 'Gender', value: gender },
-    { name: 'Qualification', value: qualification },
+    { name: 'Gender', value: genderMap[gender] ?? gender },
+    { name: 'Qualification', value: qualificationMap[qualification] ?? qualification },
     { name: 'Year', value: year },
     { name: 'CGPA', value: cgpa },
-    { name: 'Post Graduation', value: post_graduation },
+    { name: 'Post Graduation', value: yesNoMap[post_graduation] ?? post_graduation },
     { name: '10th %', value: ten_percentage },
     { name: '12th %', value: twelth_percentage },
-    { name: 'Job Role', value: job_role },
+    { name: 'Job Role', value: jobRoleMap[job_role] ?? job_role },
     { name: 'Salary', value: salary },
-    { name: 'Soft Skills', value: soft_skills },
-    { name: 'Internship', value: internship },
-    { name: 'Experience', value: experience },
+    { name: 'Soft Skills', value: softSkillsMap[soft_skills] ?? soft_skills },
+    { name: 'Internship', value: yesNoMap[internship] ?? internship },
+    { name: 'Experience', value: yesNoMap[experience] ?? experience },
     { name: 'Interview Rounds', value: round },
-    { name: 'Company', value: company_name },
+    { name: 'Company', value: companyMap[company_name] ?? company_name },
   ];
 
   return (

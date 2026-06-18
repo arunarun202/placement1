@@ -76,7 +76,7 @@ const ResumeUploadPage = () => {
             AI Resume <span className="text-[var(--color-brand-primary)]">Analyzer</span>
           </h1>
           <p className="mt-4 text-lg text-slate-600">
-            Upload your resume to get an ATS score, personalized feedback, and course recommendations powered by Gemini AI.
+            Upload your resume to get an ATS score, personalized feedback, and course recommendations powered by AI.
           </p>
         </div>
 
