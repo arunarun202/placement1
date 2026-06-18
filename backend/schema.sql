@@ -1,4 +1,6 @@
-CREATE TABLE users (
+-- Idempotent schema: safe to run on every startup (IF NOT EXISTS on all statements)
+
+CREATE TABLE IF NOT EXISTS users (
 	id SERIAL NOT NULL, 
 	username VARCHAR(150) NOT NULL, 
 	password VARCHAR(128) NOT NULL, 
@@ -10,16 +12,18 @@ CREATE TABLE users (
 	date_joined TIMESTAMP WITH TIME ZONE DEFAULT now(), 
 	PRIMARY KEY (id)
 );
-CREATE INDEX ix_users_id ON users (id);
-CREATE UNIQUE INDEX ix_users_username ON users (username);
-CREATE UNIQUE INDEX ix_users_email ON users (email);
-CREATE TABLE chatbots (
+CREATE INDEX IF NOT EXISTS ix_users_id ON users (id);
+CREATE UNIQUE INDEX IF NOT EXISTS ix_users_username ON users (username);
+CREATE UNIQUE INDEX IF NOT EXISTS ix_users_email ON users (email);
+
+CREATE TABLE IF NOT EXISTS chatbots (
 	id SERIAL NOT NULL, 
 	message TEXT NOT NULL, 
 	PRIMARY KEY (id)
 );
-CREATE INDEX ix_chatbots_id ON chatbots (id);
-CREATE TABLE profiles (
+CREATE INDEX IF NOT EXISTS ix_chatbots_id ON chatbots (id);
+
+CREATE TABLE IF NOT EXISTS profiles (
 	id SERIAL NOT NULL, 
 	user_id INTEGER NOT NULL, 
 	avatar VARCHAR(255), 
@@ -28,8 +32,9 @@ CREATE TABLE profiles (
 	UNIQUE (user_id), 
 	FOREIGN KEY(user_id) REFERENCES users (id) ON DELETE CASCADE
 );
-CREATE INDEX ix_profiles_id ON profiles (id);
-CREATE TABLE user_predict_models (
+CREATE INDEX IF NOT EXISTS ix_profiles_id ON profiles (id);
+
+CREATE TABLE IF NOT EXISTS user_predict_models (
 	id SERIAL NOT NULL, 
 	user_id INTEGER NOT NULL, 
 	age FLOAT NOT NULL, 
@@ -52,9 +57,10 @@ CREATE TABLE user_predict_models (
 	PRIMARY KEY (id), 
 	FOREIGN KEY(user_id) REFERENCES users (id) ON DELETE CASCADE
 );
-CREATE INDEX ix_user_predict_models_id ON user_predict_models (id);
-CREATE INDEX ix_user_predict_models_user_id ON user_predict_models (user_id);
-CREATE TABLE resume_uploads (
+CREATE INDEX IF NOT EXISTS ix_user_predict_models_id ON user_predict_models (id);
+CREATE INDEX IF NOT EXISTS ix_user_predict_models_user_id ON user_predict_models (user_id);
+
+CREATE TABLE IF NOT EXISTS resume_uploads (
 	id SERIAL NOT NULL, 
 	user_id INTEGER NOT NULL, 
 	name VARCHAR(255) NOT NULL, 
@@ -72,5 +78,5 @@ CREATE TABLE resume_uploads (
 	PRIMARY KEY (id), 
 	FOREIGN KEY(user_id) REFERENCES users (id) ON DELETE CASCADE
 );
-CREATE INDEX ix_resume_uploads_user_id ON resume_uploads (user_id);
-CREATE INDEX ix_resume_uploads_id ON resume_uploads (id);
+CREATE INDEX IF NOT EXISTS ix_resume_uploads_user_id ON resume_uploads (user_id);
+CREATE INDEX IF NOT EXISTS ix_resume_uploads_id ON resume_uploads (id);

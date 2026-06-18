@@ -1,0 +1,27 @@
+# render.yaml — Render Blueprint
+# Defines the backend service for automatic deployment from GitHub.
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: placement-predictor-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free                    # Change to 'starter' for always-on
+    healthCheckPath: /
+
+    envVars:
+      # Set these in the Render dashboard or via the production GitHub Environment
+      - key: DATABASE_URL
+        sync: false               # sync: false = set manually in Render dashboard
+      - key: SECRET_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "30"
