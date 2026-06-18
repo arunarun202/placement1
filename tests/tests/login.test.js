@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const testResults = [];
-const APP_URL = 'http://localhost:5173/login';
+const APP_URL = 'http://localhost:5173/placement1/login';
 
 describe('Login Page Comprehensive E2E Test Suite (100+ Cases)', function () {
     this.timeout(120000); // 2 minutes timeout for the whole suite

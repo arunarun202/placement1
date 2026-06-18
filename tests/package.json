@@ -1,0 +1,20 @@
+{
+  "name": "e2e-tests",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "mocha tests/**/*.js --timeout 60000"
+  },
+  "devDependencies": {
+    "chai": "^6.2.2",
+    "exceljs": "^4.4.0",
+    "mocha": "^11.7.6",
+    "selenium-webdriver": "^4.45.0"
+  },
+  "overrides": {
+    "diff": "^9.0.0",
+    "serialize-javascript": "^7.0.6",
+    "uuid": "^14.0.0"
+  }
+}
