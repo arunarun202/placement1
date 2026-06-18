@@ -1,4 +1,5 @@
 import { Builder, By, until, Key } from 'selenium-webdriver';
+import chrome from 'selenium-webdriver/chrome.js';
 import { expect } from 'chai';
 import ExcelJS from 'exceljs';
 import path from 'path';
@@ -15,8 +16,14 @@ describe('Login Page Comprehensive E2E Test Suite (100+ Cases)', function () {
     let driver;
 
     before(async function () {
-        driver = await new Builder().forBrowser('chrome').build();
-        await driver.manage().window().maximize(); // Maximize window for live testing visibility
+        let options = new chrome.Options();
+        if (process.env.CI) {
+            options.addArguments('--headless=new', '--no-sandbox', '--disable-dev-shm-usage');
+        }
+        driver = await new Builder().forBrowser('chrome').setChromeOptions(options).build();
+        if (!process.env.CI) {
+            await driver.manage().window().maximize(); // Maximize window for live testing visibility locally
+        }
     });
 
     after(async function () {
