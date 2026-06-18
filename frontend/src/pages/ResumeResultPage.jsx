@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaTrophy, FaLightbulb, FaBriefcase, FaGraduationCap, FaArrowLeft, FaFilePdf, FaRobot } from 'react-icons/fa';
+import { FaTrophy, FaLightbulb, FaBriefcase, FaGraduationCap, FaArrowLeft, FaFilePdf } from 'react-icons/fa';
 import api from '../api/axios';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { toast } from 'react-hot-toast';

@@ -1,8 +1,9 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
-import { toast } from 'react-hot-toast';
+import { AuthContext } from './AuthContextDef';
 
-export const AuthContext = createContext(null);
+// Re-export so consumers can keep importing from this file
+export { AuthContext } from './AuthContextDef';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);

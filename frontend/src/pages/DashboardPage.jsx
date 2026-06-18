@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaHistory, FaCheckCircle, FaExclamationTriangle, FaEye, FaArrowRight, FaFileAlt, FaTrash, FaFilePdf, FaChartLine } from 'react-icons/fa';
+import { FaHistory, FaCheckCircle, FaEye, FaArrowRight, FaFileAlt, FaTrash, FaFilePdf, FaChartLine } from 'react-icons/fa';
 import api from '../api/axios';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { toast } from 'react-hot-toast';
@@ -38,7 +38,7 @@ const DashboardPage = () => {
         await api.delete(`/resume/${id}`);
         toast.success('Resume deleted successfully');
         fetchDashboardData();
-      } catch (error) {
+      } catch (_error) {
         toast.error('Failed to delete resume');
       }
     }

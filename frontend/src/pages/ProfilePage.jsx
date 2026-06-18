@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { FaUserCircle, FaEnvelope, FaCamera, FaSave, FaEdit } from 'react-icons/fa';
-import api from '../api/axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import LoadingSpinner from '../components/LoadingSpinner';

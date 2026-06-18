@@ -1,12 +1,11 @@
 import React, { useContext, useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FaRobot, FaUserCircle, FaBars, FaTimes, FaSignOutAlt, FaHistory, FaFileAlt } from 'react-icons/fa';
+import { FaRobot, FaUserCircle, FaBars, FaTimes, FaSignOutAlt, FaHistory } from 'react-icons/fa';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
   const location = useLocation();
 
   const toggleMenu = () => setIsOpen(!isOpen);

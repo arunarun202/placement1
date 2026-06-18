@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaChartLine, FaCheckCircle, FaRedo, FaBullseye, FaUser, FaBriefcase } from 'react-icons/fa';
+import { FaChartLine, FaRedo, FaBullseye, FaUser } from 'react-icons/fa';
 
 const PredictionResult = () => {
   const location = useLocation();
