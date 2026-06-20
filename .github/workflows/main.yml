@@ -120,17 +120,7 @@ jobs:
         run: pip install openpyxl pytest httpx psycopg2-binary
 
       - name: Apply schema.sql to sandbox DB
-        run: |
-          python -c "
-          import psycopg2, os
-          conn = psycopg2.connect(os.environ['DATABASE_URL'])
-          conn.autocommit = True
-          cur = conn.cursor()
-          with open('schema.sql', 'r') as f:
-              cur.execute(f.read())
-          conn.close()
-          print('Schema applied.')
-          "
+        run: PGPASSWORD=mypassword psql -h localhost -U myuser -d placement_db -f schema.sql
 
       - name: Validate app starts (import check)
         run: python -c "from app.main import app; print('App loaded successfully')"
