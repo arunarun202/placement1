@@ -54,7 +54,7 @@ const PredictionPage = () => {
         experience: parseFloat(formData.experience),
         round: parseInt(formData.round),
       };
-      const response = await api.post('/predict/', payload);
+      const response = await api.post('/predict', payload);
       // Navigate to result page with the data
       navigate('/prediction/result', { state: { result: response.data } });
     } catch (error) {

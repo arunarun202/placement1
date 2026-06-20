@@ -10,7 +10,7 @@ from app.services import openrouter
 
 router = APIRouter()
 
-@router.post("/", response_model=ChatResponse)
+@router.post("", response_model=ChatResponse)
 async def chat_interaction(
     *,
     db: Session = Depends(deps.get_db),

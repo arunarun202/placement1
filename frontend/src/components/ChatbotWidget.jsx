@@ -23,6 +23,12 @@ const ChatbotWidget = () => {
     }
   }, [messages, isOpen]);
 
+  useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener('openChatbot', handleOpen);
+    return () => window.removeEventListener('openChatbot', handleOpen);
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -38,7 +44,7 @@ const ChatbotWidget = () => {
         .filter(m => m.sender === 'user')
         .map(m => m.text);
 
-      const response = await api.post('/chat/', { 
+      const response = await api.post('/chat', { 
         message: userMessage.text,
         history: history
       });

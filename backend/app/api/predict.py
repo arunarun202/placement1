@@ -10,7 +10,7 @@ from app.services import openrouter
 
 router = APIRouter()
 
-@router.post("/", response_model=PredictResponse)
+@router.post("", response_model=PredictResponse)
 async def create_prediction(
     *,
     db: Session = Depends(deps.get_db),

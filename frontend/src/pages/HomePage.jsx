@@ -134,9 +134,9 @@ const HomePage = () => {
               <p className="text-slate-600 mb-6">
                 Have questions about interview preparation, company policies, or career paths? Our NLP-powered chatbot provides instant, accurate answers 24/7.
               </p>
-              <Link to="/chatbot" className="text-[var(--color-brand-primary)] font-semibold flex items-center gap-2 hover:gap-3 transition-all">
+              <button onClick={(e) => { e.preventDefault(); window.dispatchEvent(new CustomEvent('openChatbot')); }} className="text-[var(--color-brand-primary)] font-semibold flex items-center gap-2 hover:gap-3 transition-all">
                 Start Chatting <span>→</span>
-              </Link>
+              </button>
             </motion.div>
           </div>
         </div>

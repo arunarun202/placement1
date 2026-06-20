@@ -55,9 +55,7 @@ const ResumeUploadPage = () => {
     data.append('job_role', formData.job_role);
 
     try {
-      const response = await api.post('/resume/upload', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const response = await api.post('/resume/upload', data);
       toast.success('Resume analyzed successfully!');
       navigate(`/resume/result/${response.data.id}`);
     } catch (error) {
