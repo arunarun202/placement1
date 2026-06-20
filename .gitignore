@@ -23,7 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment / secrets
+# Environment / secrets — never commit real credentials
 .env
 .env.*
-!.env.example
+!.env.example          # backend template — safe to commit (no values)
+!.env.supabase.local   # frontend template — safe to commit (no secrets)
