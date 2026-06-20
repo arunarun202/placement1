@@ -1,7 +1,13 @@
 import axios from 'axios';
 
+// Get the URL and strip any accidental trailing slashes (e.g., https://render.com/ -> https://render.com)
+const rawApiUrl = import.meta.env.VITE_API_URL;
+const baseURL = rawApiUrl ? rawApiUrl.replace(/\/+$/, '') : '/api';
+
+console.log("🛠️ Frontend API Base URL is set to:", baseURL);
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
