@@ -5,6 +5,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ResumeUpload from './pages/ResumeUpload';
 import ResumeResult from './pages/ResumeResult';
+import Predict from './pages/Predict';
+import PredictResult from './pages/PredictResult';
 
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/resume" element={<ResumeUpload />} />
       <Route path="/resume/result/:id" element={<ResumeResult />} />
+      <Route path="/predict" element={<Predict />} />
+      <Route path="/prediction/result" element={<PredictResult />} />
     </Routes>
   );
 }
