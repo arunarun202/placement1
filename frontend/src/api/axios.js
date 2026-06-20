@@ -34,10 +34,13 @@ api.interceptors.response.use(
   (error) => {
     // If the error status is 401, the token has expired or is invalid
     if (error.response && error.response.status === 401) {
+      const base = import.meta.env.BASE_URL || '/';
+      const loginPath = base.endsWith('/') ? base + 'login' : base + '/login';
+      
       // Avoid redirecting if we are already on the login page or trying to login
-      if (window.location.pathname !== '/login' && !error.config.url.includes('/auth/login')) {
+      if (window.location.pathname !== loginPath && !error.config.url.includes('/auth/login')) {
         localStorage.removeItem('auth_tokens');
-        window.location.href = '/login';
+        window.location.href = loginPath;
       }
     }
     return Promise.reject(error);

@@ -80,7 +80,8 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     localStorage.removeItem('auth_tokens');
     setUser(null);
-    window.location.href = '/login';
+    const base = import.meta.env.BASE_URL || '/';
+    window.location.href = base.endsWith('/') ? base + 'login' : base + '/login';
   };
 
   const updateProfile = async (formData) => {
