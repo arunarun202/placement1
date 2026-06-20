@@ -41,7 +41,10 @@ jobs:
 
       - name: Build project
         working-directory: frontend
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
         run: npm run build
+
 
       # Crucial for React Router SPA on GitHub Pages
       - name: Create 404.html fallback
