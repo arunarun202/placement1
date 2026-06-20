@@ -11,7 +11,7 @@ import {
   History, 
   LogOut, 
   CheckCircle,
-  ChevronRight
+  MessageSquare
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -71,7 +71,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
+    <div className="min-h-screen bg-slate-50 pb-20 relative">
       
       {/* Header */}
       <div className="bg-white px-5 pt-12 pb-6 rounded-b-3xl shadow-sm border-b border-slate-100 flex justify-between items-center sticky top-0 z-10">
@@ -217,6 +217,14 @@ export default function Dashboard() {
         </section>
 
       </div>
+      
+      {/* Floating Action Button for Chat */}
+      <Link 
+        to="/chat" 
+        className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white shadow-xl shadow-orange-500/30 active:scale-95 transition-transform z-20"
+      >
+        <MessageSquare className="w-6 h-6" />
+      </Link>
     </div>
   );
 }

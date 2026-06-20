@@ -7,6 +7,7 @@ import ResumeUpload from './pages/ResumeUpload';
 import ResumeResult from './pages/ResumeResult';
 import Predict from './pages/Predict';
 import PredictResult from './pages/PredictResult';
+import Chat from './pages/Chat';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
       <Route path="/resume/result/:id" element={<ResumeResult />} />
       <Route path="/predict" element={<Predict />} />
       <Route path="/prediction/result" element={<PredictResult />} />
+      <Route path="/chat" element={<Chat />} />
     </Routes>
   );
 }
