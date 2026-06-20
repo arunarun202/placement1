@@ -55,11 +55,16 @@ const ResumeUploadPage = () => {
     data.append('job_role', formData.job_role);
 
     try {
-      const response = await api.post('/resume/upload', data);
+      const response = await api.post('/resume/upload', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       toast.success('Resume analyzed successfully!');
       navigate(`/resume/result/${response.data.id}`);
     } catch (error) {
-      toast.error('Failed to process resume. Please try again.');
+      const backendError = error.response?.data?.detail || error.message || 'Failed to process resume';
+      toast.error(`Error: ${backendError}`);
       console.error(error);
     } finally {
       setLoading(false);
