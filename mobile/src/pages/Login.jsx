@@ -24,13 +24,18 @@ export default function Login() {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       
-      const response = await axios.post(`${apiUrl}/auth/login`, {
-        username,
-        password
+      const formData = new URLSearchParams();
+      formData.append('username', username);
+      formData.append('password', password);
+      
+      const response = await axios.post(`${apiUrl}/auth/login`, formData, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
 
-      if (response.status === 200 && response.data.token) {
-        localStorage.setItem('token', response.data.token);
+      if (response.status === 200 && response.data.access_token) {
+        const token = response.data.access_token;
+        localStorage.setItem('token', token);
+        localStorage.setItem('auth_tokens', JSON.stringify({ access: token }));
         navigate('/dashboard');
       } else {
         setErrorMessage('Unexpected response format. Please try again.');
