@@ -76,10 +76,14 @@ async def evaluate_resume(resume_text: str, job_role: str) -> dict:
     response_text = await _call_openrouter(messages)
     
     try:
-        # Try to parse the JSON output from the LLM
-        # Sometimes LLMs wrap JSON in ```json ... ```
-        clean_text = response_text.replace("```json", "").replace("```", "").strip()
-        return json.loads(clean_text)
+        import re
+        # Use regex to extract JSON object safely from potentially chatty responses
+        match = re.search(r'\{.*\}', response_text, re.DOTALL)
+        if match:
+            clean_text = match.group(0)
+            return json.loads(clean_text)
+        else:
+            raise json.JSONDecodeError("No JSON object found", response_text, 0)
     except Exception:
         # fallback
         return {
