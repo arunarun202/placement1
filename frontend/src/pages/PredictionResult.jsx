@@ -47,6 +47,41 @@ const PredictionResult = () => {
     { name: 'Company', value: companyMap[company_name] ?? company_name },
   ];
 
+  const parsePrediction = (text) => {
+    if (!text) return { score: null, probLabel: null, explanation: 'No prediction available.' };
+    
+    let score = null;
+    let probLabel = null;
+    let explanation = text;
+
+    const scoreMatch = text.match(/\*?Predicted Score\*?\s*[:\-]\s*\*?([^\n*]+)\*?/i);
+    if (scoreMatch) score = scoreMatch[1].trim();
+
+    const labelMatch = text.match(/\*?Prediction Label\*?\s*[:\-]\s*\*?([^\n*]+)\*?/i);
+    if (labelMatch) probLabel = labelMatch[1].trim();
+
+    const expMatch = text.match(/\*?Explanation\*?\s*[:\-]\s*([\s\S]+)/i);
+    if (expMatch) {
+      explanation = expMatch[1].trim();
+    } else {
+      // fallback
+      explanation = text.replace(/\*?Predicted Score.*?\n/ig, '').replace(/\*?Prediction Label.*?\n/ig, '').trim();
+    }
+
+    return { score, probLabel, explanation };
+  };
+
+  const { score, probLabel, explanation } = parsePrediction(label);
+
+  const getLabelColor = (l) => {
+    if (!l) return 'bg-slate-100 text-slate-700 border-slate-200';
+    const lower = l.toLowerCase();
+    if (lower.includes('high')) return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+    if (lower.includes('medium')) return 'bg-amber-100 text-amber-800 border-amber-200';
+    if (lower.includes('low')) return 'bg-rose-100 text-rose-800 border-rose-200';
+    return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 pt-10 pb-20">
       <div className="max-w-4xl mx-auto px-4">
@@ -68,16 +103,50 @@ const PredictionResult = () => {
           </div>
 
           {/* AI Prediction Result */}
-          <div className="rounded-2xl p-8 mb-10 border-l-8 bg-gradient-to-r from-orange-50 to-amber-50 border-[var(--color-brand-primary)]">
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] rounded-2xl flex items-center justify-center shrink-0">
-                <FaBullseye className="text-white text-2xl" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-slate-800 mb-3">AI Prediction & Analysis</h3>
-                <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{label || 'No prediction available.'}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-3 relative overflow-hidden">
+              <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Score</span>
+              <div className="text-4xl font-black text-[var(--color-brand-primary)]">
+                {score || '--'}
               </div>
             </div>
+            
+            <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-3 relative overflow-hidden text-center">
+              <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Prediction</span>
+              <div className={`px-5 py-2 rounded-full text-base font-bold border ${getLabelColor(probLabel)}`}>
+                {probLabel || 'Unknown'}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl p-8 mb-10 border-l-4 border-indigo-500 shadow-sm flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <FaBullseye className="text-2xl text-indigo-500" />
+              <h3 className="text-xl font-bold text-slate-800">AI Explanation</h3>
+            </div>
+            <ul className="list-disc pl-6 space-y-3 text-slate-700 text-base md:text-lg font-medium">
+              {(() => {
+                let lines = explanation.split('\n')
+                  .map(line => line.trim().replace(/^[-*]\s*/, ''))
+                  .filter(line => line.length > 0);
+                
+                // Force split into sentences if it returned a single block of text
+                if (lines.length === 1 && lines[0].length > 60) {
+                  lines = lines[0].replace(/([.!?])\s+(?=[A-Z])/g, '$1\n').split('\n')
+                    .map(line => line.trim().replace(/^[-*]\s*/, ''))
+                    .filter(line => line.length > 0);
+                }
+
+                return lines.map((point, index) => {
+                  const parts = point.split(/\*\*(.*?)\*\*/g);
+                  return (
+                    <li key={index}>
+                      {parts.map((part, i) => i % 2 === 1 ? <strong key={i} className="font-bold text-slate-900">{part}</strong> : part)}
+                    </li>
+                  );
+                });
+              })()}
+            </ul>
           </div>
 
           {/* Input Stats Summary */}

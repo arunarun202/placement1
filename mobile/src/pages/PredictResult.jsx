@@ -53,18 +53,18 @@ export default function PredictResult() {
     let probLabel = null;
     let explanation = text;
 
-    const scoreMatch = text.match(/Predicted Score:\s*([^\n]+)/i);
+    const scoreMatch = text.match(/\*?Predicted Score\*?\s*[:\-]\s*\*?([^\n*]+)\*?/i);
     if (scoreMatch) score = scoreMatch[1].trim();
 
-    const labelMatch = text.match(/Prediction Label:\s*([^\n]+)/i);
+    const labelMatch = text.match(/\*?Prediction Label\*?\s*[:\-]\s*\*?([^\n*]+)\*?/i);
     if (labelMatch) probLabel = labelMatch[1].trim();
 
-    const expMatch = text.match(/Explanation:\s*([\s\S]+)/i);
+    const expMatch = text.match(/\*?Explanation\*?\s*[:\-]\s*([\s\S]+)/i);
     if (expMatch) {
       explanation = expMatch[1].trim();
     } else {
       // fallback
-      explanation = text.replace(/Predicted Score:.*?\n/ig, '').replace(/Prediction Label:.*?\n/ig, '').trim();
+      explanation = text.replace(/\*?Predicted Score.*?\n/ig, '').replace(/\*?Prediction Label.*?\n/ig, '').trim();
     }
 
     return { score, probLabel, explanation };
@@ -120,12 +120,27 @@ export default function PredictResult() {
             <h3 className="text-lg font-bold text-slate-800">AI Explanation</h3>
           </div>
           <ul className="list-disc pl-5 space-y-2 text-slate-700 text-base font-medium">
-            {explanation.split('\n')
-              .map(line => line.trim().replace(/^[-*]\s*/, ''))
-              .filter(line => line.length > 0)
-              .map((point, index) => (
-                <li key={index}>{point}</li>
-              ))}
+            {(() => {
+              let lines = explanation.split('\n')
+                .map(line => line.trim().replace(/^[-*]\s*/, ''))
+                .filter(line => line.length > 0);
+              
+              // Force split into sentences if it returned a single block of text
+              if (lines.length === 1 && lines[0].length > 60) {
+                lines = lines[0].replace(/([.!?])\s+(?=[A-Z])/g, '$1\n').split('\n')
+                  .map(line => line.trim().replace(/^[-*]\s*/, ''))
+                  .filter(line => line.length > 0);
+              }
+
+              return lines.map((point, index) => {
+                const parts = point.split(/\*\*(.*?)\*\*/g);
+                return (
+                  <li key={index}>
+                    {parts.map((part, i) => i % 2 === 1 ? <strong key={i} className="font-bold text-slate-900">{part}</strong> : part)}
+                  </li>
+                );
+              });
+            })()}
           </ul>
         </div>
 
