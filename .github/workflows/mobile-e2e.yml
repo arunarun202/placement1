@@ -1,0 +1,84 @@
+name: Mobile E2E Testing
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  mobile-e2e:
+    # Use macOS for hardware acceleration (required for Android Emulator to run quickly)
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # Docker setup on macOS runner
+      - name: Start Docker services
+        run: |
+          docker compose up -d db backend
+          # Wait for backend to be ready
+          sleep 10
+          curl --retry 5 --retry-delay 5 http://localhost:8000/docs || true
+
+      - name: Build Web Assets for Mobile
+        working-directory: ./mobile
+        run: |
+          npm ci
+          # Configure to point to local docker backend during CI
+          echo "VITE_API_URL=http://10.0.2.2:8000" > .env.production
+          npm run build --mode production
+          
+      - name: Sync Capacitor Android
+        working-directory: ./mobile
+        run: |
+          npm install @capacitor/android
+          npx cap add android || true
+          npx cap sync android
+
+      - name: Build Android APK
+        working-directory: ./mobile/android
+        run: ./gradlew assembleDebug
+
+      - name: Install Appium
+        run: |
+          npm install -g appium
+          appium driver install uiautomator2
+
+      - name: Run Appium Server in Background
+        run: appium &
+        
+      - name: Setup Test Dependencies
+        working-directory: ./mobile/tests
+        run: npm ci
+
+      - name: Run Appium E2E Tests on Emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          target: default
+          arch: x86_64
+          profile: Nexus 6
+          script: |
+            cd mobile/tests
+            npm test
+
+      - name: Upload Test Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: Mobile-Test-Report
+          path: mobile/tests/Mobile_Test_Results_Summary.xlsx
