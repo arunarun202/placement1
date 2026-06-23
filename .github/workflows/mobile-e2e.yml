@@ -26,57 +26,72 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
-      # ─── Docker via Colima (QEMU – works without special entitlements) ──────────
-      - name: Install Docker runtime (Colima + QEMU)
+      # ─── PostgreSQL (native – no Docker/VM needed) ───────────────────────────────
+      - name: Install and start PostgreSQL 15
         run: |
-          brew install docker docker-compose colima qemu
-          # Register the docker-compose CLI plugin so `docker compose` works
-          mkdir -p ~/.docker/cli-plugins
-          ln -sfn /opt/homebrew/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
+          brew install postgresql@15
+          brew services start postgresql@15
+          # Wait for postgres to be ready
+          for i in $(seq 1 15); do
+            if /opt/homebrew/opt/postgresql@15/bin/pg_isready -q; then
+              echo "✅ PostgreSQL is ready"
+              break
+            fi
+            echo "  waiting for postgres... ($i/15)"
+            sleep 2
+          done
 
-      - name: Start Colima with QEMU (not VZ)
+      - name: Create database user and schema
         run: |
-          # --vm-type=qemu avoids the VZ Virtualization Framework which fails on GHA
-          colima start \
-            --vm-type=qemu \
-            --cpu 2 \
-            --memory 4 \
-            --disk 20 \
-            --network-address
-          docker info
+          # The brew-installed postgres runs as the current user (runner), so we
+          # use that superuser to create our app user and database
+          /opt/homebrew/opt/postgresql@15/bin/psql postgres -c "CREATE USER myuser WITH PASSWORD 'mypassword';"
+          /opt/homebrew/opt/postgresql@15/bin/psql postgres -c "CREATE DATABASE placement_db OWNER myuser;"
+          /opt/homebrew/opt/postgresql@15/bin/psql postgres -c "GRANT ALL PRIVILEGES ON DATABASE placement_db TO myuser;"
 
-      # ─── Backend services ────────────────────────────────────────────────────────
+      # ─── FastAPI backend (native Python) ─────────────────────────────────────────
       - name: Create backend .env
         run: |
-          echo "DATABASE_URL=postgresql://myuser:mypassword@db:5432/placement_db" > backend/.env
+          echo "DATABASE_URL=postgresql://myuser:mypassword@localhost:5432/placement_db" > backend/.env
           echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> backend/.env
           echo "ALGORITHM=HS256" >> backend/.env
           echo "ACCESS_TOKEN_EXPIRE_MINUTES=30" >> backend/.env
           echo "OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}" >> backend/.env
           echo "ENVIRONMENT=ci" >> backend/.env
 
-      - name: Start Docker services (db + backend)
+      - name: Install Python dependencies
         run: |
-          docker compose up -d db backend
-          echo "Waiting for backend to become healthy..."
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:8000/docs > /dev/null 2>&1; then
-              echo "✅ Backend is up after ${i}s"
+          python3 -m pip install --upgrade pip
+          pip3 install -r backend/requirements.txt
+
+      - name: Run Alembic migrations
+        working-directory: ./backend
+        run: |
+          alembic upgrade head
+
+      - name: Start FastAPI backend (background)
+        working-directory: ./backend
+        run: |
+          uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          echo "Waiting for backend to be ready..."
+          for i in $(seq 1 20); do
+            if curl -sf http://localhost:8000/ > /dev/null 2>&1; then
+              echo "✅ Backend is up after attempt $i"
               break
             fi
-            echo "  attempt $i/30 – not ready yet…"
-            sleep 5
+            echo "  attempt $i/20 – not ready yet..."
+            sleep 3
           done
 
       # ─── Mobile build ────────────────────────────────────────────────────────────
       - name: Install mobile dependencies
         working-directory: ./mobile
-        run: npm ci
+        run: npm install
 
       - name: Build Web Assets (Vite)
         working-directory: ./mobile
         run: |
-          # In the Android emulator, localhost inside the WebView resolves to 10.0.2.2
+          # In the Android emulator, 10.0.2.2 resolves to the host machine
           echo "VITE_API_URL=http://10.0.2.2:8000" > .env.production
           npm run build
 
@@ -90,7 +105,7 @@ jobs:
         working-directory: ./mobile/android
         run: ./gradlew assembleDebug --no-daemon
 
-      # ─── Appium ─────────────────────────────────────────────────────────────────
+      # ─── Appium ──────────────────────────────────────────────────────────────────
       - name: Install Appium + UiAutomator2
         run: |
           npm install -g appium@latest
@@ -99,11 +114,10 @@ jobs:
       - name: Start Appium server (background)
         run: |
           appium --log-level warn &
-          # Give Appium time to bind its port
           sleep 5
           curl -sf http://127.0.0.1:4723/status | python3 -c "import sys,json; d=json.load(sys.stdin); print('Appium ready:', d['value']['ready'])"
 
-      # ─── Install test deps ───────────────────────────────────────────────────────
+      # ─── Install test deps ────────────────────────────────────────────────────────
       - name: Install E2E test dependencies
         working-directory: ./mobile/tests
         run: npm install
@@ -116,14 +130,13 @@ jobs:
           target: google_apis
           arch: arm64-v8a
           profile: pixel_6
-          # Disable window animation so Appium interactions are more reliable
           disable-animations: true
           script: |
             echo "Emulator is booted. Running Appium E2E tests..."
             cd mobile/tests
             npm test
 
-      # ─── Upload results ──────────────────────────────────────────────────────────
+      # ─── Upload results ───────────────────────────────────────────────────────────
       - name: Upload Mobile Test Report (Excel)
         if: always()
         uses: actions/upload-artifact@v4
