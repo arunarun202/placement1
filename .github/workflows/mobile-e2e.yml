@@ -8,8 +8,8 @@ on:
 
 jobs:
   mobile-e2e:
-    # Use ubuntu-latest as requested
-    runs-on: ubuntu-latest
+    # Use macOS 15 for hardware acceleration on Apple Silicon
+    runs-on: macos-15
     
     steps:
       - name: Checkout Code
@@ -26,6 +26,11 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
+      - name: Install and Start Docker (Colima)
+        run: |
+          brew install docker docker-compose colima
+          colima start
+
       - name: Create backend .env for Docker Compose sandbox
         run: |
           echo "DATABASE_URL=postgresql://myuser:mypassword@db:5432/placement_db" > backend/.env
@@ -35,7 +40,7 @@ jobs:
           echo "OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}" >> backend/.env
           echo "ENVIRONMENT=ci" >> backend/.env
 
-      # Docker setup natively on Ubuntu
+      # Docker setup natively via Colima
       - name: Start Docker services
         run: |
           docker compose up -d db backend
@@ -77,9 +82,9 @@ jobs:
       - name: Run Appium E2E Tests on Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 29
-          target: default
-          arch: x86_64
+          api-level: 30
+          target: google_apis
+          arch: arm64-v8a
           profile: Nexus 6
           script: |
             cd mobile/tests
