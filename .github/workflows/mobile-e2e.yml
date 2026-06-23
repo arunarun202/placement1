@@ -46,7 +46,7 @@ jobs:
       - name: Build Web Assets for Mobile
         working-directory: ./mobile
         run: |
-          npm ci
+          npm install
           # Configure to point to local docker backend during CI
           echo "VITE_API_URL=http://10.0.2.2:8000" > .env.production
           npm run build
@@ -72,7 +72,7 @@ jobs:
         
       - name: Setup Test Dependencies
         working-directory: ./mobile/tests
-        run: npm ci
+        run: npm install
 
       - name: Run Appium E2E Tests on Emulator
         uses: reactivecircus/android-emulator-runner@v2
