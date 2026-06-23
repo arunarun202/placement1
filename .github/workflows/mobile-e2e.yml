@@ -20,9 +20,7 @@ jobs:
         with:
           node-version: '24'
           cache: 'npm'
-          cache-dependency-path: |
-            mobile/package-lock.json
-            mobile/tests/package-lock.json
+          cache-dependency-path: mobile/package-lock.json
 
       - name: Setup Java
         uses: actions/setup-java@v4
