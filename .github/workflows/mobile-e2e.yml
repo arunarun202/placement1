@@ -59,19 +59,24 @@ jobs:
           echo "OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}" >> backend/.env
           echo "ENVIRONMENT=ci" >> backend/.env
 
-      - name: Install Python dependencies
+      - name: Install Python dependencies (in .venv)
         run: |
-          python3 -m pip install --upgrade pip
-          pip3 install -r backend/requirements.txt
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r backend/requirements.txt
 
-      - name: Run Alembic migrations
-        working-directory: ./backend
+      # Alembic is NOT used in CI – we apply schema.sql directly for a clean, fast DB every run
+      - name: Apply database schema
         run: |
-          alembic upgrade head
+          /opt/homebrew/opt/postgresql@15/bin/psql \
+            postgresql://myuser:mypassword@localhost:5432/placement_db \
+            -f backend/schema.sql
 
       - name: Start FastAPI backend (background)
         working-directory: ./backend
         run: |
+          source ../.venv/bin/activate
           uvicorn app.main:app --host 0.0.0.0 --port 8000 &
           echo "Waiting for backend to be ready..."
           for i in $(seq 1 20); do
