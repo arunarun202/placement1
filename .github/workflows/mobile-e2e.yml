@@ -8,8 +8,8 @@ on:
 
 jobs:
   mobile-e2e:
-    # Use macOS 13 (Intel) for x86_64 emulator hardware acceleration
-    runs-on: macos-13
+    # Use ubuntu-latest as requested
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout Code
@@ -26,12 +26,7 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Install and Start Docker (Colima)
-        run: |
-          brew install docker docker-compose colima
-          colima start
-
-      # Docker setup on macOS runner
+      # Docker setup natively on Ubuntu
       - name: Start Docker services
         run: |
           docker compose up -d db backend
