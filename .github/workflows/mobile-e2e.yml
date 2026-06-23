@@ -29,7 +29,7 @@ jobs:
       # ─── Docker via Colima (QEMU – works without special entitlements) ──────────
       - name: Install Docker runtime (Colima + QEMU)
         run: |
-          brew install docker docker-compose colima
+          brew install docker docker-compose colima qemu
           # Register the docker-compose CLI plugin so `docker compose` works
           mkdir -p ~/.docker/cli-plugins
           ln -sfn /opt/homebrew/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
