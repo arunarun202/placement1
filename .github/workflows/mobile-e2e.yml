@@ -8,8 +8,8 @@ on:
 
 jobs:
   mobile-e2e:
-    # Use macOS for hardware acceleration (required for Android Emulator to run quickly)
-    runs-on: macos-latest
+    # Use macOS 13 (Intel) for x86_64 emulator hardware acceleration
+    runs-on: macos-13
     
     steps:
       - name: Checkout Code
@@ -25,6 +25,11 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
+
+      - name: Install and Start Docker (Colima)
+        run: |
+          brew install docker docker-compose colima
+          colima start
 
       # Docker setup on macOS runner
       - name: Start Docker services
