@@ -21,6 +21,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         username: user.username || '',
         email: user.email || '',

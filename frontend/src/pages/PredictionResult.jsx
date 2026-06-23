@@ -52,15 +52,15 @@ const PredictionResult = () => {
     
     let score = null;
     let probLabel = null;
-    let explanation = text;
+    let explanation;
 
-    const scoreMatch = text.match(/\*?Predicted Score\*?\s*[:\-]\s*\*?([^\n*]+)\*?/i);
+    const scoreMatch = text.match(/\*?Predicted Score\*?\s*[-:]\s*\*?([^\n*]+)\*?/i);
     if (scoreMatch) score = scoreMatch[1].trim();
 
-    const labelMatch = text.match(/\*?Prediction Label\*?\s*[:\-]\s*\*?([^\n*]+)\*?/i);
+    const labelMatch = text.match(/\*?Prediction Label\*?\s*[-:]\s*\*?([^\n*]+)\*?/i);
     if (labelMatch) probLabel = labelMatch[1].trim();
 
-    const expMatch = text.match(/\*?Explanation\*?\s*[:\-]\s*([\s\S]+)/i);
+    const expMatch = text.match(/\*?Explanation\*?\s*[-:]\s*([\s\S]+)/i);
     if (expMatch) {
       explanation = expMatch[1].trim();
     } else {

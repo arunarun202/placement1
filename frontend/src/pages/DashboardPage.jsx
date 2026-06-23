@@ -11,8 +11,8 @@ const DashboardPage = () => {
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchDashboardData = async () => {
-    setLoading(true);
+  const fetchDashboardData = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       const [predictionsRes, resumesRes] = await Promise.all([
         api.get('/predict/').catch(() => ({ data: [] })),
@@ -29,7 +29,8 @@ const DashboardPage = () => {
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchDashboardData(false);
   }, []);
 
   const handleDeleteResume = async (id) => {
@@ -37,8 +38,8 @@ const DashboardPage = () => {
       try {
         await api.delete(`/resume/${id}`);
         toast.success('Resume deleted successfully');
-        fetchDashboardData();
-      } catch (_error) {
+        fetchDashboardData(true);
+      } catch {
         toast.error('Failed to delete resume');
       }
     }
