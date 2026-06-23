@@ -26,6 +26,15 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
+      - name: Create backend .env for Docker Compose sandbox
+        run: |
+          echo "DATABASE_URL=postgresql://myuser:mypassword@db:5432/placement_db" > backend/.env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> backend/.env
+          echo "ALGORITHM=HS256" >> backend/.env
+          echo "ACCESS_TOKEN_EXPIRE_MINUTES=30" >> backend/.env
+          echo "OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}" >> backend/.env
+          echo "ENVIRONMENT=ci" >> backend/.env
+
       # Docker setup natively on Ubuntu
       - name: Start Docker services
         run: |
