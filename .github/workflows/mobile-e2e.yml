@@ -18,7 +18,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '24'
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -49,7 +49,7 @@ jobs:
           npm ci
           # Configure to point to local docker backend during CI
           echo "VITE_API_URL=http://10.0.2.2:8000" > .env.production
-          npm run build --mode production
+          npm run build
           
       - name: Sync Capacitor Android
         working-directory: ./mobile
