@@ -21,8 +21,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . .
 
-# Make the DB init script executable
-RUN chmod +x /app/init_db.sh
+# Make the DB init script executable (and fix Windows line endings)
+RUN sed -i 's/\r$//' /app/init_db.sh && \
+    chmod +x /app/init_db.sh
 
 # Expose port
 EXPOSE 8000

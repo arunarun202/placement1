@@ -43,7 +43,13 @@ async def predict_placement(stats: dict) -> str:
     Please provide your response in the following format:
     Predicted Score: [A percentage score from 0% to 100%]
     Prediction Label: [High Probability / Medium Probability / Low Probability]
-    Explanation: [A personalized, concise explanation considering their CGPA, skills, target company, and experience. Do not give generic advice, refer strictly to their stats.]
+    Explanation:
+    - [Point 1: Personalized feedback on their CGPA or academics]
+    - [Point 2: Feedback on their skills]
+    - [Point 3: Feedback on internship or experience]
+    - [Point 4: Alignment with the target company expectations]
+    - [Point 5: Final actionable insight]
+    (Provide exactly 5-6 concise bullet points, referring strictly to their stats. Do not give generic advice.)
     """
     messages = [
         {"role": "system", "content": "You are a professional career advisor and predictive analytics AI."},

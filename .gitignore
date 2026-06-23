@@ -28,3 +28,7 @@ dist-ssr
 .env.*
 !.env.example          # backend template — safe to commit (no values)
 !.env.supabase.local   # frontend template — safe to commit (no secrets)
+
+# Capacitor build folders
+mobile/android
+mobile/ios

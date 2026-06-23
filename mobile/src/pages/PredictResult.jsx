@@ -46,6 +46,41 @@ export default function PredictResult() {
     { name: 'Company', value: companyMap[company_name] ?? company_name },
   ];
 
+  const parsePrediction = (text) => {
+    if (!text) return { score: null, probLabel: null, explanation: 'No prediction available.' };
+    
+    let score = null;
+    let probLabel = null;
+    let explanation = text;
+
+    const scoreMatch = text.match(/Predicted Score:\s*([^\n]+)/i);
+    if (scoreMatch) score = scoreMatch[1].trim();
+
+    const labelMatch = text.match(/Prediction Label:\s*([^\n]+)/i);
+    if (labelMatch) probLabel = labelMatch[1].trim();
+
+    const expMatch = text.match(/Explanation:\s*([\s\S]+)/i);
+    if (expMatch) {
+      explanation = expMatch[1].trim();
+    } else {
+      // fallback
+      explanation = text.replace(/Predicted Score:.*?\n/ig, '').replace(/Prediction Label:.*?\n/ig, '').trim();
+    }
+
+    return { score, probLabel, explanation };
+  };
+
+  const { score, probLabel, explanation } = parsePrediction(label);
+
+  const getLabelColor = (l) => {
+    if (!l) return 'bg-slate-100 text-slate-700 border-slate-200';
+    const lower = l.toLowerCase();
+    if (lower.includes('high')) return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+    if (lower.includes('medium')) return 'bg-amber-100 text-amber-800 border-amber-200';
+    if (lower.includes('low')) return 'bg-rose-100 text-rose-800 border-rose-200';
+    return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+  };
+
   return (
     <div className="min-h-screen w-full bg-slate-50 flex flex-col pb-10">
       {/* Header */}
@@ -62,22 +97,36 @@ export default function PredictResult() {
 
       <div className="px-5 pt-6 space-y-6">
         
-        {/* Prediction Card */}
-        <div className="bg-white rounded-3xl p-6 border-l-4 border-primary shadow-sm flex flex-col gap-4 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <Target className="w-24 h-24 text-primary" />
-          </div>
-          
-          <div className="flex items-center gap-3 relative z-10">
-            <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center shrink-0">
-              <Target className="w-5 h-5 text-primary" />
+        {/* Prediction Cards */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-2 relative overflow-hidden">
+            <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Score</span>
+            <div className="text-3xl font-black text-primary">
+              {score || '--'}
             </div>
-            <h2 className="text-lg font-bold text-slate-800">AI Prediction</h2>
           </div>
           
-          <p className="text-slate-700 text-lg font-medium relative z-10">
-            {label || 'No prediction available.'}
-          </p>
+          <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-2 relative overflow-hidden text-center">
+            <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Prediction</span>
+            <div className={`px-4 py-1.5 rounded-full text-sm font-bold border ${getLabelColor(probLabel)}`}>
+              {probLabel || 'Unknown'}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl p-6 border-l-4 border-indigo-500 shadow-sm flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <Target className="w-5 h-5 text-indigo-500" />
+            <h3 className="text-lg font-bold text-slate-800">AI Explanation</h3>
+          </div>
+          <ul className="list-disc pl-5 space-y-2 text-slate-700 text-base font-medium">
+            {explanation.split('\n')
+              .map(line => line.trim().replace(/^[-*]\s*/, ''))
+              .filter(line => line.length > 0)
+              .map((point, index) => (
+                <li key={index}>{point}</li>
+              ))}
+          </ul>
         </div>
 
         {/* Input Summary */}

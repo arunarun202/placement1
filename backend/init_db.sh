@@ -17,7 +17,7 @@ try:
     conn.close()
     sys.exit(0)
 except Exception as e:
-    print(f'  [{i}/30] DB not ready: {e}', flush=True)
+    print(f'  [${i}/30] DB not ready: {e}', flush=True)
     sys.exit(1)
 "; then
         echo "==> Database connected!"
