@@ -280,6 +280,9 @@ jobs:
     if: always()
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Print status
         run: |
           echo "============================================="
@@ -290,3 +293,16 @@ jobs:
           echo "  Security Scan  : ${{ needs.security-scan.result }}"
           echo "  E2E Sandbox    : ${{ needs.e2e-sandbox.result }}"
           echo "============================================="
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-artifacts
+
+      - name: Bundle all Excel Test Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-excel-test-reports
+          path: |
+            **/*.xlsx
+            all-artifacts/**/*.xlsx
