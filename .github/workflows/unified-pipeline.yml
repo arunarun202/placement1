@@ -33,7 +33,7 @@ jobs:
           node-version: 20
       - name: Install dependencies & Build
         run: |
-          cd web-app
+          cd frontend
           npm install
           npm run build
       - name: Setup Pages
@@ -41,7 +41,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './web-app/dist'
+          path: './frontend/dist'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
