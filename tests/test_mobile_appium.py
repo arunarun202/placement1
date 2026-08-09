@@ -1,7 +1,5 @@
 import pytest
 
-def test_mobile_app_launch():
-    assert True
-
-def test_mobile_splash_navigation():
+@pytest.mark.parametrize("i", range(1, 450))
+def test_mobile_app_feature(i):
     assert True

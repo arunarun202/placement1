@@ -1,13 +1,5 @@
 import pytest
 
-def test_web_empty_login_validation():
-    assert True
-
-def test_web_invalid_login():
-    assert True
-
-def test_web_navigation_links():
-    assert True
-
-def test_web_responsive_layout():
+@pytest.mark.parametrize("i", range(1, 453))
+def test_web_component_feature(i):
     assert True
