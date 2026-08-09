@@ -4,3 +4,4 @@ pytest-html
 pandas
 openpyxl
 Appium-Python-Client
+pytest-excel

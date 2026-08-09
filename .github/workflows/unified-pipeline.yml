@@ -74,13 +74,15 @@ jobs:
       - name: Run Web Selenium E2E Tests against Live URL
         run: |
           cd tests
-          pytest test_web_selenium.py --html=execution-report.html -v
+          pytest test_web_selenium.py --html=execution-report.html --excelreport=Web_Test_Report.xlsx -v
       - name: Upload Selenium Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: selenium-report
-          path: tests/execution-report.html
+          path: |
+            tests/execution-report.html
+            tests/Web_Test_Report.xlsx
 
   test_mobile_appium:
     name: Run Mobile Appium Tests
@@ -135,13 +137,15 @@ jobs:
             appium driver install uiautomator2
             appium > appium.log 2>&1 &
             sleep 10
-            cd tests && pytest test_mobile_appium.py --html=appium-report.html -v
+            cd tests && pytest test_mobile_appium.py --html=appium-report.html --excelreport=Mobile_Test_Report.xlsx -v
       - name: Upload Appium Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: appium-report
-          path: tests/appium-report.html
+          path: |
+            tests/appium-report.html
+            tests/Mobile_Test_Report.xlsx
 
   test_api_load:
     name: Run API Load Tests
@@ -177,11 +181,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Python deps
+        run: |
+          pip install pandas openpyxl
       - name: Run Gitleaks Security Scan
         run: |
           wget https://github.com/gitleaks/gitleaks/releases/download/v8.18.1/gitleaks_8.18.1_linux_x64.tar.gz
           tar -xzf gitleaks_8.18.1_linux_x64.tar.gz
-          ./gitleaks detect --source . -v || true
+          ./gitleaks detect --source . -v --report-path=tests/gitleaks-report.json || true
+      - name: Generate Security Excel Report
+        run: |
+          cd tests
+          python generate_security_report.py || true
+      - name: Upload Security Excel Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-report
+          path: tests/Security_Test_Report.xlsx
 
   consolidate_reports:
     name: Consolidate & Verify Reports
